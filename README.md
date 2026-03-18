@@ -4,7 +4,7 @@
     <strong>Catch App Store & Google Play rejection reasons before you submit.</strong>
   </p>
   <p align="center">
-    Static analysis for mobile apps — checks your project against 50+ Apple & Google guidelines so you don't get rejected.
+    Static analysis for mobile apps — checks your project against 71 Apple & Google guidelines so you don't get rejected.
   </p>
   <p align="center">
     <a href="https://www.npmjs.com/package/guidelint"><img src="https://img.shields.io/npm/v/guidelint.svg?style=flat-square" alt="npm version"></a>
@@ -16,7 +16,7 @@
     <a href="#installation">Installation</a> •
     <a href="#quick-start">Quick Start</a> •
     <a href="#ai-ready-output">AI-Ready Output</a> •
-    <a href="#rules">51 Rules</a> •
+    <a href="#rules">71 Rules</a> •
     <a href="#supported-platforms">Platforms</a> •
     <a href="#language-support">4 Languages</a>
   </p>
@@ -98,9 +98,11 @@ npx guidelint ./MyApp
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [AI-Ready Output](#ai-ready-output) — the killer feature
+- [Auto-Fix](#auto-fix) — `--fix` flag
+- [Ignore Files](#ignore-files) — `.guidelintignore`
 - [Language Support](#language-support) — EN, TR, DE, NL
 - [Supported Platforms](#supported-platforms)
-- [All 51 Rules](#rules) — complete reference
+- [All 71 Rules](#rules) — complete reference
 - [Scoring System](#scoring)
 - [Output Formats](#output-formats)
 - [CI/CD Integration](#cicd-integration)
@@ -125,12 +127,14 @@ These are not bugs. They're **checklist items** that cost developers days of bac
 
 | Feature | Guidelint | Manual review | Other linters |
 |---|---|---|---|
-| App Store guidelines | ✅ 51 rules | ❌ Human error | ❌ Code-only |
-| Google Play guidelines | ✅ 20 rules | ❌ Human error | ❌ Code-only |
+| App Store guidelines | ✅ 71 rules | ❌ Human error | ❌ Code-only |
+| Google Play guidelines | ✅ 23 rules | ❌ Human error | ❌ Code-only |
 | Privacy manifest (2024) | ✅ Auto-detect | ⚠️ Easy to forget | ❌ Not supported |
 | AI-ready output | ✅ `--format prompt` | ❌ | ❌ |
 | Multi-language | ✅ EN/TR/DE/NL | ❌ | ❌ |
 | Cross-platform | ✅ iOS+Android+RN+Flutter | ❌ Platform-specific | ⚠️ Usually one |
+| Auto-fix | ✅ `--fix` flag | ❌ | ⚠️ Limited |
+| Ignore files | ✅ `.guidelintignore` | ❌ | ✅ |
 | Zero config | ✅ `npx guidelint .` | ❌ | ⚠️ Config files |
 | Readiness score | ✅ 0-100 with verdict | ❌ | ❌ |
 
@@ -172,6 +176,8 @@ Options:
   --ios-only                 Only run iOS rules
   --android-only             Only run Android rules
   --min-severity <severity>  Minimum severity to report             (default: "low")
+  --ignore <patterns...>     Glob patterns to ignore
+  --fix                      Auto-fix simple issues where possible
   -V, --version              Output version number
   -h, --help                 Display help
 ```
@@ -196,6 +202,12 @@ guidelint ./MyApp --android-only
 
 # Show only critical and high severity issues
 guidelint ./MyApp --min-severity high
+
+# Auto-fix common issues
+guidelint ./MyApp --fix
+
+# Ignore specific directories
+guidelint ./MyApp --ignore "test/**" "vendor/**"
 
 # Combine: German, prompt format, critical only
 guidelint ./MyApp --lang de --format prompt --min-severity critical
@@ -300,6 +312,64 @@ Want to add a language? See [Contributing](#contributing).
 
 ---
 
+## Auto-Fix
+
+Run with `--fix` to automatically correct common issues:
+
+```bash
+guidelint ./MyApp --fix
+```
+
+```
+  ✓ Auto-fixed 5 issue(s): AND-GRADLE-001, AND-GRADLE-002, AND-GRADLE-003, AND-GRADLE-004, COM-SEC-002
+```
+
+What it fixes:
+
+| Issue | Before | After |
+|---|---|---|
+| targetSdkVersion | 33 | 35 |
+| compileSdk | 33 | 35 |
+| debuggable (release) | true | false |
+| minifyEnabled (release) | false | true |
+| NSAllowsArbitraryLoads | true | false |
+| HTTP URLs | `http://` | `https://` |
+
+The tool only fixes safe, deterministic changes. Complex issues still require manual review.
+
+---
+
+## Ignore Files
+
+### .guidelintignore
+
+Create a `.guidelintignore` file in your project root. Same syntax as `.gitignore`:
+
+```
+# Skip test files
+test/**
+tests/**
+__tests__/**
+*.spec.ts
+*.test.ts
+
+# Skip vendor code
+vendor/**
+Pods/**
+
+# Skip generated files
+generated/**
+*.g.dart
+```
+
+### --ignore flag
+
+```bash
+guidelint ./MyApp --ignore "test/**" "vendor/**" "*.spec.ts"
+```
+
+---
+
 ## Supported Platforms
 
 Guidelint auto-detects your project type and runs the right rules.
@@ -333,16 +403,26 @@ vendor/          __tests__/     test/          tests/
 
 ### Overview
 
-Guidelint ships with **51 rules** across 6 categories:
+Guidelint ships with **71 rules** across 6 categories:
 
 | Category | # Rules | Weight | What it covers |
 |---|---|---|---|
-| 🔒 **Privacy** | 21 | 30% | Usage descriptions, privacy manifest, ATT, tracking, dangerous permissions |
-| 🛡️ **Security** | 10 | 25% | Hardcoded secrets, HTTP URLs, ATS, cleartext traffic, banned device IDs |
-| ⚡ **Performance** | 10 | 20% | Crash risks, SDK versions, PendingIntent flags, force unwrap |
-| 🎨 **Design** | 4 | 10% | Placeholder content, bundle ID validation, metadata |
+| 🔒 **Privacy** | 23 | 30% | Usage descriptions, privacy manifest, ATT, tracking, dangerous permissions, background modes |
+| 🛡️ **Security** | 14 | 25% | Hardcoded secrets, HTTP URLs, ATS, cleartext traffic, banned device IDs, signing passwords |
+| ⚡ **Performance** | 18 | 20% | Crash risks, SDK versions, PendingIntent, force unwrap, Hermes, AsyncTask, inlineRequires |
+| 🎨 **Design** | 5 | 10% | Placeholder content, bundle ID, metadata, KeyboardAvoidingView |
 | 💰 **Business** | 2 | 10% | In-App Purchase compliance, restore purchases |
 | ⚖️ **Legal** | 3 | 5% | Account deletion requirement, privacy policy |
+
+### Platform breakdown
+
+| Platform | Rules | Highlights |
+|---|---|---|
+| **iOS** | 27 | Privacy manifest, 11 usage descriptions, ATT, StoreKit, background modes, force unwrap |
+| **Android** | 23 | targetSdk, 7 dangerous permissions, exported, PendingIntent, signing passwords, arm64 |
+| **React Native** | 7 | Hermes, Flipper, \_\_DEV\_\_ leak, console.log, bridge deprecation, inlineRequires |
+| **Flutter** | 6 | debugPrint, kDebugMode, permission plugins, obfuscation, android:exported |
+| **Cross-platform** | 8 | Hardcoded secrets, HTTP URLs, placeholder content, empty catch, sensitive logging |
 
 ### How rules work
 
@@ -732,12 +812,11 @@ Based on [Apple's 2024 App Store Transparency Report](https://developer.apple.co
 
 | Version | Feature | Status |
 |---|---|---|
-| **v0.1** | Core engine, 51 rules, 3 formats, 4 languages | ✅ Released |
-| **v0.2** | React Native & Flutter specific rules | 🔜 Planned |
-| **v0.3** | `--fix` flag for auto-fixable issues | 🔜 Planned |
-| **v0.4** | `.ipa` / `.apk` binary analysis | 🔜 Planned |
-| **v0.5** | Custom rules via `.guidelintrc` config | 🔜 Planned |
-| **v0.6** | `--ignore` flag and `.guidelintignore` file | 🔜 Planned |
+| **v0.1** | Core engine, 51 rules, 3 output formats, 4 languages | ✅ Released |
+| **v0.2** | React Native (7) + Flutter (6) rules, `--fix`, `--ignore`, `.guidelintignore`, 20 new rules | ✅ Released |
+| **v0.3** | `.ipa` / `.apk` binary analysis | 🔜 Planned |
+| **v0.4** | Custom rules via `.guidelintrc` config | 🔜 Planned |
+| **v0.5** | More `--fix` handlers, watch mode | 🔜 Planned |
 | **v1.0** | Xcode & Android Studio plugins | 📋 Backlog |
 | **v1.1** | AI-powered analysis (usage description quality, permission relevance) | 📋 Backlog |
 | **v2.0** | Web dashboard + GitHub App | 📋 Backlog |

@@ -1,0 +1,58 @@
+{
+  "name": "guidelint",
+  "version": "0.1.0",
+  "description": "App Store & Google Play pre-submission linter. Catch rejection reasons before review.",
+  "main": "dist/index.js",
+  "bin": {
+    "guidelint": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "app-store",
+    "google-play",
+    "lint",
+    "ios",
+    "android",
+    "react-native",
+    "flutter",
+    "swift",
+    "kotlin",
+    "review",
+    "guidelines",
+    "privacy",
+    "plist"
+  ],
+  "author": "Kayra Demirkan (https://github.com/kayrademirkan)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kayrademirkan/guidelint.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kayrademirkan/guidelint/issues"
+  },
+  "homepage": "https://github.com/kayrademirkan/guidelint#readme",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^14.0.3",
+    "fast-glob": "^3.3.3",
+    "fast-xml-parser": "^5.5.6"
+  }
+}

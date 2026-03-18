@@ -314,5 +314,113 @@ export const en: Translations = {
       message: "{count} empty catch block(s) — errors may be silently swallowed",
       fix: "Log errors or inform the user instead of silently swallowing them",
     },
+
+    // ── New iOS Rules ──
+    "IOS-PERF-001": {
+      title: "Minimum deployment target too low",
+      message: "MinimumOSVersion {version} — very few users on iOS 12 and below",
+      fix: "Consider raising minimum deployment target to iOS 15+ for better API support",
+    },
+    "IOS-PRIV-500": {
+      title: "Background mode enabled",
+      message: "Background modes enabled: requires justification from Apple",
+      fix: "Ensure each background mode is essential and explain in App Review notes",
+    },
+    "IOS-PRIV-600": {
+      title: "Privacy policy reference not found",
+      message: "No privacy policy URL or reference found — required for all apps",
+      fix: "Add a privacy policy URL in App Store Connect and inside your app",
+    },
+    "IOS-CRASH-003": {
+      title: "Unhandled async errors",
+      message: "{count} URLSession call(s) without try/catch — may crash on network errors",
+      fix: "Wrap network calls in do/try/catch blocks",
+    },
+
+    // ── New Android Rules ──
+    "AND-SEC-200": {
+      title: "Hardcoded signing password in build.gradle",
+      message: "Signing password hardcoded in build.gradle — security risk",
+      fix: "Move passwords to gradle.properties or environment variables",
+    },
+    "AND-PERF-001": {
+      title: "Missing arm64-v8a ABI support",
+      message: "arm64-v8a not in abiFilters — most modern devices require it",
+      fix: 'Add "arm64-v8a" to ndk.abiFilters in build.gradle',
+    },
+    "AND-PERF-002": {
+      title: "Deprecated AsyncTask usage",
+      message: "AsyncTask is deprecated since API 30 — use Coroutines or WorkManager",
+      fix: "Migrate AsyncTask to Kotlin Coroutines or WorkManager",
+    },
+
+    // ── React Native Rules ──
+    "RN-SEC-001": {
+      title: "__DEV__ flag may leak to production",
+      message: "__DEV__ flag used with sensitive data — may leak if misconfigured",
+      fix: "Use environment variables (.env) instead of __DEV__ for secrets",
+    },
+    "RN-PERF-001": {
+      title: "console.log in production code",
+      message: "{count} console.log/warn/error statements — slows down production builds",
+      fix: "Use babel-plugin-transform-remove-console or wrap in __DEV__ checks",
+    },
+    "RN-PERF-002": {
+      title: "Deprecated React Native bridge usage",
+      message: "Legacy NativeModules bridge detected — consider migrating to TurboModules",
+      fix: "Migrate to TurboModules/Fabric for better performance on New Architecture",
+    },
+    "RN-PERF-003": {
+      title: "Large import at top level",
+      message: "metro.config missing inlineRequires — app startup may be slow",
+      fix: "Add inlineRequires: true to metro.config.js transformer options",
+    },
+    "RN-PERF-004": {
+      title: "Hermes engine not enabled",
+      message: "Hermes engine not enabled — significantly impacts performance and app size",
+      fix: "Set hermesEnabled=true in android/app/build.gradle",
+    },
+    "RN-SEC-002": {
+      title: "Flipper debug tool in production",
+      message: "react-native-flipper is in dependencies (not devDependencies) — ships to production",
+      fix: "Move react-native-flipper to devDependencies",
+    },
+    "RN-UX-001": {
+      title: "KeyboardAvoidingView missing",
+      message: "TextInput used but no KeyboardAvoidingView found — keyboard may cover input fields",
+      fix: "Wrap forms with KeyboardAvoidingView for better UX on iOS",
+    },
+
+    // ── Flutter Rules ──
+    "FLT-PERF-001": {
+      title: "debugPrint/print in production code",
+      message: "{count} print/debugPrint statements found — should use kDebugMode check",
+      fix: "Wrap prints with: if (kDebugMode) { print(...); } or use a logger package",
+    },
+    "FLT-SEC-001": {
+      title: "kDebugMode used for sensitive logic",
+      message: "kDebugMode used with sensitive data — may leak if misconfigured",
+      fix: "Use --dart-define or .env files for secrets instead of kDebugMode checks",
+    },
+    "FLT-PERF-002": {
+      title: "Flutter minSdkVersion too low",
+      message: "minSdkVersion {version} is very low — Flutter recommends 21+",
+      fix: "Set minSdkVersion to 21 or higher in android/app/build.gradle",
+    },
+    "FLT-PRIV-001": {
+      title: "Permission plugin without Info.plist entry",
+      message: "Flutter plugin requires permission entry in Info.plist",
+      fix: "Add the required usage description to ios/Runner/Info.plist",
+    },
+    "FLT-SEC-002": {
+      title: "Dart obfuscation not configured",
+      message: "Dart code obfuscation not detected — release builds may be reverse-engineered",
+      fix: "Build with: flutter build apk --obfuscate --split-debug-info=debug-info/",
+    },
+    "FLT-PERF-003": {
+      title: "Flutter android:exported missing",
+      message: "Flutter activity missing android:exported — crashes on Android 12+",
+      fix: 'Add android:exported="true" to the main activity in AndroidManifest.xml',
+    },
   },
 };

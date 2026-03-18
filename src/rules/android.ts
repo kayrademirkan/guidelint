@@ -324,6 +324,74 @@ const accountDeleteAndroid: Rule = {
   },
 };
 
+const hardcodedSigningPassword: Rule = {
+  id: "AND-SEC-200",
+  title: "Hardcoded signing password in build.gradle",
+  severity: "critical",
+  category: "security",
+  platform: "android",
+  check(ctx) {
+    if (!ctx.buildGradle) return null;
+    if (!/signingConfigs[\s\S]*?(storePassword|keyPassword)\s*[=:]\s*["'][^"']+["']/.test(ctx.buildGradle)) return null;
+    return {
+      ruleId: this.id,
+      title: this.title,
+      severity: "critical",
+      category: "security",
+      platform: "android",
+      message: "Signing password hardcoded in build.gradle — security risk",
+      fix: "Move passwords to gradle.properties or environment variables",
+      file: "app/build.gradle",
+    };
+  },
+};
+
+const missingArm64: Rule = {
+  id: "AND-PERF-001",
+  title: "Missing arm64-v8a ABI support",
+  severity: "high",
+  category: "performance",
+  platform: "android",
+  check(ctx) {
+    if (!ctx.buildGradle) return null;
+    const abiMatch = ctx.buildGradle.match(/abiFilters\s+(.+)/);
+    if (!abiMatch) return null;
+    if (abiMatch[1].includes("arm64-v8a")) return null;
+    return {
+      ruleId: this.id,
+      title: this.title,
+      severity: "high",
+      category: "performance",
+      platform: "android",
+      message: "arm64-v8a not in abiFilters — most modern devices require it",
+      fix: 'Add "arm64-v8a" to ndk.abiFilters in build.gradle',
+      file: "app/build.gradle",
+    };
+  },
+};
+
+const asyncTaskUsage: Rule = {
+  id: "AND-PERF-002",
+  title: "Deprecated AsyncTask usage",
+  severity: "medium",
+  category: "performance",
+  platform: "android",
+  check(ctx) {
+    const file = sourceContains(ctx, /AsyncTask/, ["kotlin", "java"]);
+    if (!file) return null;
+    return {
+      ruleId: this.id,
+      title: this.title,
+      severity: "medium",
+      category: "performance",
+      platform: "android",
+      message: "AsyncTask is deprecated since API 30 — use Coroutines or WorkManager",
+      fix: "Migrate AsyncTask to Kotlin Coroutines or WorkManager",
+      file,
+    };
+  },
+};
+
 export const androidRules: Rule[] = [
   manifestMissing,
   exportedMissing,
@@ -336,5 +404,8 @@ export const androidRules: Rule[] = [
   pendingIntentFlag,
   privacyPolicyMissing,
   accountDeleteAndroid,
+  hardcodedSigningPassword,
+  missingArm64,
+  asyncTaskUsage,
   ...createPermissionRules(),
 ];

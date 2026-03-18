@@ -435,6 +435,115 @@ const usageDescriptionQuality: Rule = {
   },
 };
 
+const minDeploymentTarget: Rule = {
+  id: "IOS-PERF-001",
+  title: "Minimum deployment target too low",
+  severity: "medium",
+  category: "performance",
+  platform: "ios",
+  check(ctx) {
+    if (!ctx.plistRaw) return null;
+    const match = ctx.plistRaw.match(/<key>MinimumOSVersion<\/key>\s*<string>(\d+)/);
+    if (!match) return null;
+    const version = parseInt(match[1]);
+    if (version >= 13) return null;
+    return {
+      ruleId: this.id,
+      title: this.title,
+      severity: "medium",
+      category: "performance",
+      platform: "ios",
+      message: `MinimumOSVersion ${version} — very few users on iOS 12 and below`,
+      fix: "Consider raising minimum deployment target to iOS 15+ for better API support",
+      file: "Info.plist",
+    };
+  },
+};
+
+const backgroundModeJustification: Rule = {
+  id: "IOS-PRIV-500",
+  title: "Background mode enabled",
+  severity: "medium",
+  category: "privacy",
+  platform: "ios",
+  check(ctx) {
+    if (!ctx.plistRaw) return null;
+    if (!ctx.plistRaw.includes("<key>UIBackgroundModes</key>")) return null;
+    const riskyModes = ["location", "voip", "bluetooth-central"];
+    const found = riskyModes.filter((m) => ctx.plistRaw!.includes(`<string>${m}</string>`));
+    if (found.length === 0) return null;
+    return {
+      ruleId: this.id,
+      title: this.title,
+      severity: "medium",
+      category: "privacy",
+      platform: "ios",
+      message: `Background modes enabled: ${found.join(", ")} — Apple requires justification`,
+      fix: "Ensure each background mode is essential and explain usage in App Review notes",
+      file: "Info.plist",
+    };
+  },
+};
+
+const privacyPolicyIOS: Rule = {
+  id: "IOS-PRIV-600",
+  title: "Privacy policy reference not found",
+  severity: "medium",
+  category: "privacy",
+  platform: "ios",
+  check(ctx) {
+    if (!ctx.platforms.includes("ios")) return null;
+    const hasRef = sourceContains(ctx, /privacy.?policy|privacypolicy/i);
+    if (hasRef) return null;
+    if (ctx.plistRaw?.includes("privacy")) return null;
+    return {
+      ruleId: this.id,
+      title: this.title,
+      severity: "medium",
+      category: "privacy",
+      platform: "ios",
+      message: "No privacy policy URL or reference found — required for all apps",
+      fix: "Add a privacy policy URL in App Store Connect and inside your app (Settings/About)",
+    };
+  },
+};
+
+const emptyErrorHandler: Rule = {
+  id: "IOS-CRASH-003",
+  title: "Unhandled async errors",
+  severity: "medium",
+  category: "performance",
+  platform: "ios",
+  check(ctx) {
+    let count = 0;
+    let firstFile = "";
+    for (const f of ctx.sourceFiles) {
+      if (f.language !== "swift") continue;
+      // Network calls without try/catch
+      const matches = f.content.match(/URLSession\.shared\.data(?:Task)?\s*\(/g);
+      if (matches) {
+        // Check if there's a do/try nearby
+        const hasTry = /try\s+(?:await\s+)?URLSession/.test(f.content);
+        if (!hasTry) {
+          count += matches.length;
+          if (!firstFile) firstFile = f.relativePath;
+        }
+      }
+    }
+    if (count === 0) return null;
+    return {
+      ruleId: this.id,
+      title: this.title,
+      severity: "medium",
+      category: "performance",
+      platform: "ios",
+      message: `${count} URLSession call(s) without try/catch — may crash on network errors`,
+      fix: "Wrap network calls in do/try/catch blocks",
+      file: firstFile,
+    };
+  },
+};
+
 export const iosRules: Rule[] = [
   plistMissing,
   privacyManifestMissing,
@@ -448,5 +557,9 @@ export const iosRules: Rule[] = [
   forceUnwrap,
   fatalError,
   usageDescriptionQuality,
+  minDeploymentTarget,
+  backgroundModeJustification,
+  privacyPolicyIOS,
+  emptyErrorHandler,
   ...createPrivacyKeyRules(),
 ];

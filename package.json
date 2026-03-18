@@ -1,6 +1,6 @@
 {
   "name": "guidelint",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "App Store & Google Play pre-submission linter. Catch rejection reasons before review.",
   "main": "dist/index.js",
   "bin": {

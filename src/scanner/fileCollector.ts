@@ -1,6 +1,6 @@
 import fg from "fast-glob";
-import { basename, relative } from "path";
-import { statSync } from "fs";
+import { basename, relative, join } from "path";
+import { statSync, readFileSync, existsSync } from "fs";
 import type { ScannedFile } from "../types.js";
 
 const SCAN_PATTERNS = [
@@ -57,13 +57,28 @@ const IGNORE_PATTERNS = [
   "**/*.test.*",
 ];
 
+function loadIgnoreFile(projectPath: string): string[] {
+  const ignorePath = join(projectPath, ".guidelintignore");
+  if (!existsSync(ignorePath)) return [];
+
+  const content = readFileSync(ignorePath, "utf-8");
+  return content
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("#"));
+}
+
 export async function collectFiles(
-  projectPath: string
+  projectPath: string,
+  extraIgnore: string[] = []
 ): Promise<ScannedFile[]> {
+  const userIgnore = loadIgnoreFile(projectPath);
+  const allIgnore = [...IGNORE_PATTERNS, ...userIgnore, ...extraIgnore];
+
   const entries = await fg(SCAN_PATTERNS, {
     cwd: projectPath,
     absolute: true,
-    ignore: IGNORE_PATTERNS,
+    ignore: allIgnore,
     dot: false,
     onlyFiles: true,
   });

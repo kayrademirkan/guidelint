@@ -19,7 +19,7 @@ program
   .description(
     "App Store & Google Play pre-submission linter. Catch rejection reasons before review."
   )
-  .version("0.1.0")
+  .version("0.2.0")
   .argument("[path]", "Path to the project directory", ".")
   .option(
     "-f, --format <format>",
@@ -34,6 +34,8 @@ program
   .option("--ios-only", "Only run iOS rules")
   .option("--android-only", "Only run Android rules")
   .option("--min-severity <severity>", "Minimum severity to report", "low")
+  .option("--ignore <patterns...>", "Glob patterns to ignore (e.g. --ignore 'src/test/**' 'vendor/**')")
+  .option("--fix", "Auto-fix simple issues where possible")
   .action(async (inputPath: string, options) => {
     const projectPath = resolve(inputPath);
 
@@ -58,6 +60,8 @@ program
       iosOnly: options.iosOnly,
       androidOnly: options.androidOnly,
       minSeverity: options.minSeverity,
+      ignore: options.ignore || [],
+      fix: options.fix || false,
     });
 
     // Translate findings to selected locale

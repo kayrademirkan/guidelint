@@ -24,7 +24,7 @@ export function formatTerminal(result: ScanResult): string {
 
   // Header
   lines.push("");
-  lines.push(chalk.bold.cyan(`  ${ui.scanTitle}`) + chalk.gray(" v0.1.0"));
+  lines.push(chalk.bold.cyan(`  ${ui.scanTitle}`) + chalk.gray(" v0.2.0"));
   lines.push(chalk.gray("  ─".repeat(30)));
   lines.push("");
   lines.push(
@@ -37,6 +37,11 @@ export function formatTerminal(result: ScanResult): string {
     `  ${chalk.gray("Rules:")}    ${result.rulesChecked} ${ui.rulesChecked}`
   );
   lines.push("");
+
+  if (result.fixed?.length) {
+    lines.push(chalk.green(`  ✓ Auto-fixed ${result.fixed.length} issue(s): ${result.fixed.join(", ")}`));
+    lines.push("");
+  }
 
   if (result.findings.length === 0) {
     lines.push(chalk.green(`  ✓ ${ui.noIssues}`));

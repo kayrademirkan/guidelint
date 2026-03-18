@@ -71,6 +71,7 @@ export interface ScanResult {
   filesScanned: number;
   rulesChecked: number;
   timestamp: string;
+  fixed?: string[];
 }
 
 export interface ScoreResult {
